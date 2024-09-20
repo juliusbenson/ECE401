@@ -39,6 +39,7 @@ def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates
     aliased_phasors (complex array) - phasors with which sinusoids seems to occur
     '''
 
+    aliased_freqs = [min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) for k in range(frequencies)]
     for k,_ in enumerate(frequencies):
         alias = min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) # from MP2.ipynb (block 7)
     raise RuntimeError("You need to write this part!")
