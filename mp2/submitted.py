@@ -39,9 +39,26 @@ def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates
     aliased_phasors (complex array) - phasors with which sinusoids seems to occur
     '''
 
-    aliased_freqs = [min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) for k in range(frequencies)]
-    for k,_ in enumerate(frequencies):
-        alias = min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) # from MP2.ipynb (block 7)
+    # aliased_freqs = [min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) for k in range(frequencies)]
+    aliased_freqs = []
+    aliased_phasors = []
+    for k in range(frequencies):
+        f =  frequencies[k]
+        z =      phasors[k]
+        Fs = samplerates[k]
+
+        if f / Fs > round(f / Fs):
+            fa = f % Fs
+            za = z
+        elif f/ Fs < round (f / Fs):
+            fa = f % Fs
+            za = z.conjugate()
+
+        aliased_freqs.append(fa)
+        aliased_phasors.append(za)
+    return aliased_freqs, aliased_phasors
+    # for k,_ in enumerate(frequencies):
+    #     alias = min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) # from MP2.ipynb (block 7)
     raise RuntimeError("You need to write this part!")
 
 def fourier_analysis(signal, number_of_coefficients):
