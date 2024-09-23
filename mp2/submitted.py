@@ -75,7 +75,8 @@ def fourier_analysis(signal : list[float], number_of_coefficients : int) -> list
 
     return coefficients
 
-def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
+# def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
+def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
     '''
     highrate_signal = interpolate(lowrate_signal, T, kernel_timeaxis, kernel)
     Use lowrate-to-highrate conversion to simulate discrete-to-continuous conversion.
@@ -85,16 +86,21 @@ def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[
     kernel_timeaxis (array) - sample times of the kernel, at the highrate
     kernel (array) - the interpolation kernel.  length(kernel)==length(kernel_timeaxis).
     highrate_signal (length-N*T array) - the highrate signal
+
+    Note: in order to keep the output to only N*T samples, use modulo arithmetic for the 
+    interpolation, e.g.,
+    highrate_signal[np.mod(kernel_timeaxis+n*T, N*T)] += kernel * lowrate_signal[n]
     '''
-    def h(time) -> float: # address kernel values by time, not by array index
-        kernel[kernel_timeaxis.index(time)]
 
-    highrate_signal = np.zeros(T*len(lowrate_signal))
+    N = len(lowrate_signal)
+    highrate_signal = np.zeros(N*T)
 
-    for t,hisample in enumerate(highrate_signal):
-        for n,losample in enumerate(lowrate_signal):
-            tosum = losample * h(t - (n*T))
-        hisample = np.sum(tosum)
+    for n in range(N):
+        kRange = np.mod(np.add(kernel_timeaxis, n*T), N*T) # the + operator isn't overloaded to work with arrays like np.add is
+        toPut  = np.take(highrate_signal, kRange, mode='wrap') # python stock indexing doesn't support modular indexing
+        toPut += np.multiply(kernel, lowrate_signal[n]) # the * operator isn't overloaded to work with arrays like np.multiply is
+
+        np.put(highrate_signal, kRange, toPut, mode='wrap')
 
     return highrate_signal
     raise RuntimeError("You need to write this part!")
