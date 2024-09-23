@@ -39,29 +39,24 @@ def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates
     aliased_phasors (complex array) - phasors with which sinusoids seems to occur
     '''
 
-    # aliased_freqs = [min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) for k in range(frequencies)]
-    aliased_freqs = []
     aliased_phasors = []
-    for k in range(frequencies):
+    for k,_ in enumerate(frequencies):
         f =  frequencies[k]
         z =      phasors[k]
         Fs = samplerates[k]
 
-        if f / Fs > round(f / Fs):
-            fa = f % Fs
-            za = z
-        elif f/ Fs < round (f / Fs):
-            fa = f % Fs
+        if f / Fs < round (f / Fs):
             za = z.conjugate()
+        else:
+            za = z
 
-        aliased_freqs.append(fa)
         aliased_phasors.append(za)
-    return aliased_freqs, aliased_phasors
-    # for k,_ in enumerate(frequencies):
-    #     alias = min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) # from MP2.ipynb (block 7)
-    raise RuntimeError("You need to write this part!")
 
-def fourier_analysis(signal, number_of_coefficients):
+    aliased_freqs = [min(frequencies[k] % samplerates[k], (samplerates[k]-frequencies[k]) % samplerates[k]) for k in range(len(frequencies))]
+
+    return aliased_freqs, aliased_phasors
+
+def fourier_analysis(signal : list[float], number_of_coefficients : int) -> list[complex]:
     '''
     coefficients = fourier_analysis(signal, number_of_coefficients)
     Find the Fourier series coefficients using the discrete-time Fourier analysis formula.
@@ -70,9 +65,17 @@ def fourier_analysis(signal, number_of_coefficients):
     number_of_coefficients (scalar) = number of coefficients to compute, starting with X_0
     coefficients (array of length=number_of_coefficients) = X_0 through X_{number_of_coefficients-1}
     '''
-    raise RuntimeError("You need to write this part!")
 
-def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
+    N_0 = len(signal)
+    coefficients = []
+
+    for k in range(number_of_coefficients):
+        X_k = np.sum([(cmath.rect(signal[n],-2*cmath.pi*k*n/N_0)) for n in range(N_0)]) / N_0
+        coefficients.append(X_k)
+
+    return coefficients
+
+def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
     '''
     highrate_signal = interpolate(lowrate_signal, T, kernel_timeaxis, kernel)
     Use lowrate-to-highrate conversion to simulate discrete-to-continuous conversion.
@@ -82,14 +85,21 @@ def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
     kernel_timeaxis (array) - sample times of the kernel, at the highrate
     kernel (array) - the interpolation kernel.  length(kernel)==length(kernel_timeaxis).
     highrate_signal (length-N*T array) - the highrate signal
-    
-    Note: in order to keep the output to only N*T samples, use modulo arithmetic for the 
-    interpolation, e.g.,
-    highrate_signal[np.mod(kernel_timeaxis+n*T, N*T)] += kernel * lowrate_signal[n]
     '''
+    def h(time) -> float: # address kernel values by time, not by array index
+        kernel[kernel_timeaxis.index(time)]
+
+    highrate_signal = np.zeros(T*len(lowrate_signal))
+
+    for t,hisample in enumerate(highrate_signal):
+        for n,losample in enumerate(lowrate_signal):
+            tosum = losample * h(t - (n*T))
+        hisample = np.sum(tosum)
+
+    return highrate_signal
     raise RuntimeError("You need to write this part!")
 
-def rectangle(T):
+def rectangle(T : float) -> tuple[list[int], list[float]]:
     '''
     timeaxis, h = rectangle(T)
     Return a rectangle function of length T.
@@ -100,7 +110,7 @@ def rectangle(T):
     '''
     raise RuntimeError("You need to write this part!")
 
-def triangle(T):
+def triangle(T : int) -> tuple[list[int], list[float]]:
     '''
     timeaxis, h = triangle(T)
     Return a triangle function of length 2*T-1.
@@ -109,6 +119,15 @@ def triangle(T):
     timeaxis (array, length 2*T-1) - sample indices, from -(T-1) through (T-1)
     h (array, length 2*T-1) - the triangle function, 1 - abs(timeaxis)/T
     '''
+    timeaxis = (list)(range(-T+1,T))
+    h = []
+
+    for n in timeaxis:
+        hn = 1 - np.abs(n) / T
+        h.append(hn)
+
+    print(timeaxis)
+    return timeaxis, h
     raise RuntimeError("You need to write this part!")
 
 def spline(T):
