@@ -96,14 +96,13 @@ def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
     highrate_signal = np.zeros(N*T)
 
     for n in range(N):
-        kRange = np.mod(np.add(kernel_timeaxis, n*T), N*T) # the + operator isn't overloaded to work with arrays like np.add is
-        toPut  = np.take(highrate_signal, kRange, mode='wrap') # python stock indexing doesn't support modular indexing
-        toPut += np.multiply(kernel, lowrate_signal[n]) # the * operator isn't overloaded to work with arrays like np.multiply is
+        kRange = np.mod(np.add(kernel_timeaxis, n*T), N*T)      # the + operator isn't overloaded to work with arrays like np.add is
+        toPut  = np.take(highrate_signal, kRange, mode='wrap')  # python stock indexing doesn't support modular indexing
+        toPut += np.multiply(kernel, lowrate_signal[n])         # the * operator isn't overloaded to work with arrays like np.multiply is
 
         np.put(highrate_signal, kRange, toPut, mode='wrap')
 
     return highrate_signal
-    raise RuntimeError("You need to write this part!")
 
 def rectangle(T : float) -> tuple[list[int], list[float]]:
     '''
@@ -114,7 +113,10 @@ def rectangle(T : float) -> tuple[list[int], list[float]]:
     timeaxis (length-T array) - sample indices, from 0 to T-1, corresponding to h
     h (length-T array) - the rectangle function
     '''
-    raise RuntimeError("You need to write this part!")
+
+    timeaxis = (list[int])(range(T))
+    h = np.ones(T)
+    return timeaxis, h
 
 def triangle(T : int) -> tuple[list[int], list[float]]:
     '''
@@ -134,7 +136,6 @@ def triangle(T : int) -> tuple[list[int], list[float]]:
 
     print(timeaxis)
     return timeaxis, h
-    raise RuntimeError("You need to write this part!")
 
 def spline(T):
     '''
@@ -145,6 +146,17 @@ def spline(T):
     timeaxis (array, length 4*T-1) - sample indices, from -(2*T-1) through (2*T-1)
     h (array, length 4*T-1) - the cubic spline interpolation kernel
     '''
+
+    timeaxis = (list[int])(range(-(2*T-1),(2*T-1)))
+    h = np.zeros(len(timeaxis))
+    for n,t in enumerate(timeaxis):
+        if np.abs(t) <= T:
+            h[n] = 1 - (3/2)*(np.abs(t)/T)**2 + (1/2)*(np.abs(t)/T)**3
+        elif (T <= np.abs(t)) or (np.abs(t) <= 2*T):
+            h[n] = -(3/2)*(((np.abs(t)-2*T)/T)**2)*((np.abs(t)-T)/T)
+        else:
+            h[n] = 0
+    return timeaxis, h
     raise RuntimeError("You need to write this part!")
 
 def sinc(T, D):
@@ -157,6 +169,14 @@ def sinc(T, D):
     timeaxis (array, length D) - sample indices, from -(D-1)/2 through (D-1)/2
     h (array, length 4*T-1) - the sinc interpolation kernel
     '''
+    timeaxis = (list[int])(range(-(D-1)//2,(D-1)//2))
+    h = np.zeros(len(timeaxis))
+    for n,t in enumerate(timeaxis):
+        if t == 0:
+            h[n] = 1
+        else:
+            h[n] = (np.sin(np.pi*t/T))/(np.pi*t/T)
+    return timeaxis, h
     raise RuntimeError("You need to write this part!")
 
 
