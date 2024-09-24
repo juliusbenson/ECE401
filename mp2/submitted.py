@@ -104,7 +104,7 @@ def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[
 
     return highrate_signal
 
-def rectangle(T : float) -> tuple[list[int], list[float]]:
+def rectangle(T : int) -> tuple[list[int], list[float]]:
     '''
     timeaxis, h = rectangle(T)
     Return a rectangle function of length T.
@@ -157,7 +157,6 @@ def spline(T : int) -> tuple[list[int], list[float]]:
         else:
             h[n] = 0
     return timeaxis, h
-    raise RuntimeError("You need to write this part!")
 
 def sinc(T : int, D : int) -> tuple[list[int], list[float]]:
     '''
@@ -177,6 +176,5 @@ def sinc(T : int, D : int) -> tuple[list[int], list[float]]:
         else:
             h[n] = (np.sin(np.pi*t/T))/(np.pi*t/T)
     return timeaxis, h
-    raise RuntimeError("You need to write this part!")
 
 
