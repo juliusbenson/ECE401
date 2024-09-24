@@ -75,8 +75,8 @@ def fourier_analysis(signal : list[float], number_of_coefficients : int) -> list
 
     return coefficients
 
-# def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
-def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
+def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
+# def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
     '''
     highrate_signal = interpolate(lowrate_signal, T, kernel_timeaxis, kernel)
     Use lowrate-to-highrate conversion to simulate discrete-to-continuous conversion.
@@ -137,7 +137,7 @@ def triangle(T : int) -> tuple[list[int], list[float]]:
     print(timeaxis)
     return timeaxis, h
 
-def spline(T):
+def spline(T : int) -> tuple[list[int], list[float]]:
     '''
     timeaxis, h = spline(T)
     Return a continuous spline interpolator with continuous first deriviative.
@@ -159,7 +159,7 @@ def spline(T):
     return timeaxis, h
     raise RuntimeError("You need to write this part!")
 
-def sinc(T, D):
+def sinc(T : int, D : int) -> tuple[list[int], list[float]]:
     '''
     timeaxis, h = sinc(T, D)
     Return D samples from the center of h(t)=sin(pi*t/T) / (pi*t/T).
