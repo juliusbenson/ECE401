@@ -9,7 +9,7 @@ function's docstring.
 import numpy as np
 import cmath
 
-def sinusoid(phasor:complex, frequency:float, duration:float, samplerate:float) -> tuple[list[float], list[float]]:
+def sinusoid(phasor:complex, frequency:float, duration:float, samplerate:float) -> tuple[np.array, np.array]:
     '''
     timeaxis, signal = sinusoid(phasor, frequency, duration, samplerate)
     Generate a sinusoid.
@@ -25,9 +25,9 @@ def sinusoid(phasor:complex, frequency:float, duration:float, samplerate:float) 
     samples = (int)(samplerate*duration) # ( samples / second ) * seconds = samples
     timeaxis = [n/samplerate for n in range(0,samples+1)] # inluding endpoint
     signal = [(phasor * cmath.rect(1,2*cmath.pi*t*frequency)).real for t in timeaxis]
-    return timeaxis, signal
+    return np.array(timeaxis), np.array(signal)
     
-def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates:list[float]) -> tuple[list[float], list[complex]]:
+def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates:list[float]) -> tuple[np.array, np.array]:
     '''
     aliased_freqs, aliased_phasors = compute_aliasing(frequencies, phasors, samplerates)
     Find the frequency and phasor of sinusoid aliases.  All arguments should have same length.
@@ -56,7 +56,7 @@ def compute_aliasing(frequencies:list[float], phasors:list[complex], samplerates
 
     return aliased_freqs, aliased_phasors
 
-def fourier_analysis(signal : list[float], number_of_coefficients : int) -> list[complex]:
+def fourier_analysis(signal : list[float], number_of_coefficients : int) -> np.array:
     '''
     coefficients = fourier_analysis(signal, number_of_coefficients)
     Find the Fourier series coefficients using the discrete-time Fourier analysis formula.
@@ -75,7 +75,7 @@ def fourier_analysis(signal : list[float], number_of_coefficients : int) -> list
 
     return coefficients
 
-def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> list[float]:
+def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[float], kernel : list[float]) -> np.array:
 # def interpolate(lowrate_signal, T, kernel_timeaxis, kernel):
     '''
     highrate_signal = interpolate(lowrate_signal, T, kernel_timeaxis, kernel)
@@ -104,7 +104,7 @@ def interpolate(lowrate_signal : list[float], T : float, kernel_timeaxis : list[
 
     return highrate_signal
 
-def rectangle(T : int) -> tuple[list[int], list[float]]:
+def rectangle(T : int) -> tuple[np.array, np.array]:
     '''
     timeaxis, h = rectangle(T)
     Return a rectangle function of length T.
@@ -114,11 +114,11 @@ def rectangle(T : int) -> tuple[list[int], list[float]]:
     h (length-T array) - the rectangle function
     '''
 
-    timeaxis = (list[int])(range(T))
+    timeaxis = np.arange(T)
     h = np.ones(T)
     return timeaxis, h
 
-def triangle(T : int) -> tuple[list[int], list[float]]:
+def triangle(T : int) -> tuple[np.array, np.array]:
     '''
     timeaxis, h = triangle(T)
     Return a triangle function of length 2*T-1.
@@ -127,17 +127,15 @@ def triangle(T : int) -> tuple[list[int], list[float]]:
     timeaxis (array, length 2*T-1) - sample indices, from -(T-1) through (T-1)
     h (array, length 2*T-1) - the triangle function, 1 - abs(timeaxis)/T
     '''
-    timeaxis = (list)(range(-T+1,T))
-    h = []
+    timeaxis = np.arange(-T+1,T)
+    h = np.zeros(2*T-1)
 
-    for n in timeaxis:
-        hn = 1 - np.abs(n) / T
-        h.append(hn)
+    for n,t in enumerate(timeaxis):
+        h[n] = 1 - np.abs(t) / T
 
-    print(timeaxis)
     return timeaxis, h
 
-def spline(T : int) -> tuple[list[int], list[float]]:
+def spline(T : int) -> tuple[np.array, np.array]:
     '''
     timeaxis, h = spline(T)
     Return a continuous spline interpolator with continuous first deriviative.
@@ -147,7 +145,7 @@ def spline(T : int) -> tuple[list[int], list[float]]:
     h (array, length 4*T-1) - the cubic spline interpolation kernel
     '''
 
-    timeaxis = (list[int])(range(-(2*T-1),(2*T-1)))
+    timeaxis = np.arange(-(2*T-1),(2*T))
     h = np.zeros(len(timeaxis))
     for n,t in enumerate(timeaxis):
         if np.abs(t) <= T:
@@ -158,7 +156,7 @@ def spline(T : int) -> tuple[list[int], list[float]]:
             h[n] = 0
     return timeaxis, h
 
-def sinc(T : int, D : int) -> tuple[list[int], list[float]]:
+def sinc(T : int, D : int) -> tuple[np.array, np.array]:
     '''
     timeaxis, h = sinc(T, D)
     Return D samples from the center of h(t)=sin(pi*t/T) / (pi*t/T).
@@ -168,7 +166,7 @@ def sinc(T : int, D : int) -> tuple[list[int], list[float]]:
     timeaxis (array, length D) - sample indices, from -(D-1)/2 through (D-1)/2
     h (array, length 4*T-1) - the sinc interpolation kernel
     '''
-    timeaxis = (list[int])(range(-(D-1)//2,(D-1)//2))
+    timeaxis = np.arange(-(D-1)//2,((D-1)//2)+1)
     h = np.zeros(len(timeaxis))
     for n,t in enumerate(timeaxis):
         if t == 0:
