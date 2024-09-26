@@ -26,17 +26,21 @@ def rate_conversion(highrate_signal, highrate, lowrate):
     N_0T = len(highrate_signal)
     T = highrate / lowrate
     N_0 = N_0T / T
-    coefficients = submitted.fourier_analysis(highrate_signal,int((N_0-1)//2))
+    coefficients = submitted.fourier_analysis(highrate_signal,int((N_0-1)//2)+1)
+    print(f'{len(coefficients)} coefficients: {coefficients}')
     lowrate_signal = np.zeros(int(N_0))
     for n,losample in enumerate(lowrate_signal):
-        toSum = 0 + 0j
-        for k in range(-int((N_0-1)/2),int((N_0-1)/2)):
-        # for k,X_k in enumerate(coefficients):
-            X_k = coefficients[k]
-            toSum += cmath.rect(X_k,2*cmath.pi*k*n/N_0)
-        lowrate_signal[n] = toSum.real
+        # toSum = 0 + 0j
+        # for k,X_k in enumerate(coefficients): # these will only be the positive coefficients, but we know that the negative coefficients have the same frequency (but negative), and the same phase and amplitude
+        # # for k,X_k in enumerate(coefficients):
+        #     # X_k = coefficients[k]
+        #     print(f'coefficient X_{k} = {X_k}')
+        #     toSum += cmath.rect(X_k,2*cmath.pi*k*n/N_0) + cmath.rect(X_k,2*cmath.pi*(-k)*n/N_0) # doing two symmetrical coefficients at once, we're all adding them together anyway
+        # if toSum.imag != 0: raise Exception("fourier sum contains imaginary part") # if we get here, something's wrong in the code. we should never hit this.
+        # lowrate_signal[n] = toSum.real
+        lowrate_signal[n] = np.sum([cmath.rect(X_k,2*cmath.pi*k*n/N_0).real for k,X_k in enumerate(coefficients)])
 
-    coefficients = np.array(list(reversed(coefficients)) + [0] + coefficients)
+    coefficients = np.array(list(reversed(coefficients)) + coefficients[1:])
     print(len(coefficients))
     print(coefficients)
 
