@@ -30,7 +30,8 @@ def todo_rectangular_filter():
     Return 11 samples of both n_rect and h_rect.
     '''
     n_rect = np.array([-5,-4,-3,-2,-1,0,1,2,3,4,5])
-    raise NotImplementedError('You need to write this part!')
+    h_rect = np.multiply((1/7), np.array([0,0,1,1,1,1,1,1,1,0,0]))
+    # raise NotImplementedError('You need to write this part!')
     return(n_rect,h_rect)
 
 def todo_convolve_rows(X, h):
@@ -39,8 +40,12 @@ def todo_convolve_rows(X, h):
     Use mode='same', so that the output, Y, has the same size as X.
     '''
     (nrows,ncols,ncolors) = X.shape
-    Y = np.zeros((nrows,ncols,ncolors))
-    raise NotImplementedError('You need to write this part!')
+    Y = np.zeros_like(X)
+    for n in range(nrows):
+        for c in range(ncolors):
+            row = X[n,:,c]
+            Y[n,:,c] = np.convolve(row, h, mode='same')
+    # raise NotImplementedError('You need to write this part!')
     return(Y)
 
 def todo_convolve_columns(X, h):
@@ -49,8 +54,13 @@ def todo_convolve_columns(X, h):
     Use mode='same', so that the output, Y, has the same size as X.
     '''
     (nrows,ncols,ncolors) = X.shape
-    Y = np.zeros((nrows,ncols,ncolors))
-    raise NotImplementedError('You need to write this part!')
+    print(X.shape)
+    Y = np.zeros_like(X)
+    for n in range(ncols):
+        for c in range(ncolors):
+            row = X[:,n,c]
+            Y[:,n,c] = np.convolve(row, h, mode='same')
+    # raise NotImplementedError('You need to write this part!')
     return(Y)
 
 def todo_backward_difference():
@@ -62,7 +72,8 @@ def todo_backward_difference():
     Return the n_array and the h_array.
     '''
     n_diff = np.array([-5,-4,-3,-2,-1,0,1,2,3,4,5])
-    raise NotImplementedError('You need to write this part!')
+    h_diff = np.array([0,0,0,0,0,1,-1,0,0,0,0])
+    # raise NotImplementedError('You need to write this part!')
     return(n_diff,h_diff)
 
 def todo_gaussian_smoother(stdev=1):
@@ -73,7 +84,8 @@ def todo_gaussian_smoother(stdev=1):
     Return the n_array and the h_array.
     '''
     n_gauss = np.array([-5,-4,-3,-2,-1,0,1,2,3,4,5])
-    raise NotImplementedError('You need to write this part!')
+    h_gauss = np.array([gaussian(n,0,stdev) for n in n_gauss])
+    # raise NotImplementedError('You need to write this part!')
     return(n_gauss,h_gauss)
 
 def todo_difference_of_gaussians():
@@ -84,7 +96,8 @@ def todo_difference_of_gaussians():
     Return the n_array and the h_array.
     '''
     n_dog = np.array([-5,-4,-3,-2,-1,0,1,2,3,4,5])
-    raise NotImplementedError('You need to write this part!')
+    h_dog = np.subtract([gaussian(n,0,1) for n in n_dog],[gaussian(n,1,1) for n in n_dog])
+    # raise NotImplementedError('You need to write this part!')
     return(n_dog,h_dog)
 
 def todo_normalize_colors(X):
@@ -94,7 +107,9 @@ def todo_normalize_colors(X):
     '''
     (nrows,ncols,ncolors) = X.shape
     Y = np.zeros((nrows,ncols,ncolors))
-    raise NotImplementedError('You need to write this part!')
+    for c in range(ncolors):
+        Y[:,:,c] = np.divide(X[:,:,c],np.max(X[:,:,c]))
+    # raise NotImplementedError('You need to write this part!')
     return(Y)
 
 def todo_gradient_magnitude(GH, GV):
@@ -102,7 +117,8 @@ def todo_gradient_magnitude(GH, GV):
     Given the horizontal gradient GH and vertical gradient GV,
     compute and return the gradient magnitude GM=sqrt(GH**2 + GV**2)
     '''
-    raise NotImplementedError('You need to write this part!')
+    GM = np.sqrt(np.add(np.square(GH), np.square(GV)))
+    # raise NotImplementedError('You need to write this part!')
     return(GM)
 
 
