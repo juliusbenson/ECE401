@@ -14,7 +14,26 @@ def downsample_and_shift_dft2(oversampled_dft, downsampling_factor, row_shift, c
       image [M1/downsampling_factor, M2/downsampling_factor] - the real part of the inverse DFT
       of the valid frequency samples, shifted by the specified numbers of rows and columns.
     '''
-    raise RuntimeError("You need to write this!")
+    downsampled = oversampled_dft[::downsampling_factor,::downsampling_factor]
+    (N1,N2) = downsampled.shape
+    X_corrected = np.zeros_like(downsampled)
+    for k1,row in enumerate(downsampled):
+        for k2,_ in enumerate(row):
+            if (0 <= k1) and (k1 < (N1/2)): # top
+                rowshift = np.exp(-2j*np.pi*k1*row_shift/N1)
+            else: # bottom
+                rowshift = np.exp(-2j*np.pi*(k1-N1)*row_shift/N1)
+
+            if (0 <= k2) and (k2 < (N2/2)): # left
+                colshift = np.exp(-2j*np.pi*k2*col_shift/N2)
+            else: # right
+                colshift = np.exp(-2j*np.pi*(k2-N2)*col_shift/N2)
+
+            X_corrected[k1,k2] = downsampled[k1,k2]*rowshift*colshift
+
+    return np.real(np.fft.ifft2(X_corrected))
+    # return np.real(X_corrected)
+    # raise RuntimeError("You need to write this!")
     
 def dft_filter(noisy_image, min1, max1, min2, max2):
     '''
@@ -27,7 +46,24 @@ def dft_filter(noisy_image, min1, max1, min2, max2):
       Be sure to take the real part of the inverse DFT, and then truncate
       so that 0 <= cleaned_image[n1,n2,color] <= 1 for all n1,n2,color.
     '''
-    raise  RuntimeError("You need to write this!")
+    (N1,N2,_) = noisy_image.shape
+    noisy_dft = np.fft.fft2(noisy_image, axes=(0,1))
+    X_corrected = np.zeros_like(noisy_dft)
+    for k1,row in enumerate(noisy_dft):
+        for k2,_ in enumerate(row):
+            if (min1 <= k1) and (k1 < max1):
+                X_corrected[k1,k2] = 0
+            elif (min1 <= (N1 - k1)) and ((N1 - k1) < max1):
+                X_corrected[k1,k2] = 0
+            elif (min2 <= k2) and (k2 < max2):
+                X_corrected[k1,k2] = 0
+            elif (min2 <= (N2 - k2)) and ((N2 - k2) < max2):
+                X_corrected[k1,k2] = 0
+            else:
+                X_corrected[k1,k2] = noisy_dft[k1,k2]
+
+    return np.real(np.fft.ifft2(X_corrected,axes=(0,1)))
+    # raise  RuntimeError("You need to write this!")
     
 def transitioned_filter(noisy_image, min1, max1, min2, max2):
     '''
@@ -44,7 +80,32 @@ def transitioned_filter(noisy_image, min1, max1, min2, max2):
       the bands k1=min1-1, k1=max1, k2=min2-1, and k2=max2 should be set to half of their
       original values, 0.5*X[k1,k2].
     '''
-    raise  RuntimeError("You need to write this!")
+    (N1,N2,_) = noisy_image.shape
+    noisy_dft = np.fft.fft2(noisy_image, axes=(0,1))
+    X_corrected = np.zeros_like(noisy_dft)
+    for k1,row in enumerate(noisy_dft):
+        for k2,_ in enumerate(row):
+            if (min1 <= k1) and (k1 < max1):
+                X_corrected[k1,k2] = 0
+            elif (min1 <= (N1 - k1)) and ((N1 - k1) < max1):
+                X_corrected[k1,k2] = 0
+            elif (min2 <= k2) and (k2 < max2):
+                X_corrected[k1,k2] = 0
+            elif (min2 <= (N2 - k2)) and ((N2 - k2) < max2):
+                X_corrected[k1,k2] = 0
+            elif (min1-1 <= k1) and (k1 < max1):
+                X_corrected[k1,k2] = noisy_dft[k1,k2]/2
+            elif (min2-1 <= k2) and (k2 < max2):
+                X_corrected[k1,k2] = noisy_dft[k1,k2]/2
+            elif (min1-1 <= (N1 - k1)) and ((N1 - k1) < max1):
+                X_corrected[k1,k2] = noisy_dft[k1,k2]/2
+            elif (min2-1 <= (N2 - k2)) and ((N2 - k2) < max2):
+                X_corrected[k1,k2] = noisy_dft[k1,k2]/2
+            else:
+                X_corrected[k1,k2] = noisy_dft[k1,k2]
+
+    return np.real(np.fft.ifft2(X_corrected,axes=(0,1)))
+    # raise  RuntimeError("You need to write this!")
 
 def zero_pad(h, x):
     '''
@@ -56,7 +117,18 @@ def zero_pad(h, x):
       hp [N] - the same h, but zero-padded to a length of N=L+M-1
       xp [N] - the same x, but zero-padded to a length of N=L+M-1
     '''
-    raise  RuntimeError("You need to write this!")
+    L = len(h)
+    M = len(x)
+    N = L + M - 1
+
+    hp = np.zeros(N)
+    xp = np.zeros(N)
+
+    for i in range(L): hp[i]=h[i]
+    for j in range(M): xp[j]=x[j]
+
+    return hp, xp
+    # raise  RuntimeError("You need to write this!")
 
 def overlap_add(h, x, M):
     '''
@@ -81,4 +153,11 @@ def overlap_add(h, x, M):
      - add the inverse DFT to the correct place in the y array
     Return y
     '''
-    raise  RuntimeError("You need to write this!")
+    hp, xp = zero_pad(h,x)
+
+    H = np.fft.fft(hp)
+
+    for i in range(M):
+        
+
+    # raise  RuntimeError("You need to write this!")
