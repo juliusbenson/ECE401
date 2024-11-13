@@ -124,8 +124,8 @@ def zero_pad(h, x):
     hp = np.zeros(N)
     xp = np.zeros(N)
 
-    for i in range(L): hp[i]=h[i]
-    for j in range(M): xp[j]=x[j]
+    hp[:L]=h[:]
+    xp[:M]=x[:]
 
     return hp, xp
     # raise  RuntimeError("You need to write this!")
@@ -153,11 +153,49 @@ def overlap_add(h, x, M):
      - add the inverse DFT to the correct place in the y array
     Return y
     '''
-    hp, xp = zero_pad(h,x)
+    L = len(h)
+    N = L+M-1
+    NF = (int)(np.ceil(len(x) / M))
 
+    # xp = np.zeros(NF*M)
+    # xp[:len(x)]=x[:] # This will make things easier later
+
+    # First, zero-pad h to a length of N samples, where N=L+M-1.
+    hp = np.zeros(N)
+    hp[:L]=h[:]
+
+    # Second, compute its DFT, H.
     H = np.fft.fft(hp)
 
-    for i in range(M):
-        
+    # Third, chop x into frames of length M.
+    frames = []
+    for i in range(NF):
+        if len(x[i*M:]) >= M:
+            frames.append(x[i*M:i*M+M])
+        else:
+            frames.append(x[i*M:])
+
+    # Fourth, prepare the output array, y, of length equal to NF*M + L - 1.
+    y = np.zeros(NF*M + L - 1)
+
+    # Fifth, for each frame of M samples in x:
+    for i,frame in enumerate(frames):
+    #  - zero-pad to a length of N
+        fp = np.zeros(N)
+        fp[:len(frame)]=frame[:]
+
+    #  - compute its DFT
+        F = np.fft.fft(fp)
+
+    #  - multiply its DFT by H
+        FH = np.multiply(F,H)
+
+    #  - inverse DFT
+        fh = np.fft.ifft(FH)
+        # print(f'len(fh) {len(fh)}')
+
+    #  - add the inverse DFT to the correct place in the y array
+        y[i*M:i*M+N]=y[i*M:i*M+N]+fh[:]
+    return y
 
     # raise  RuntimeError("You need to write this!")
