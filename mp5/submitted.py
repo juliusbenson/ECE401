@@ -157,8 +157,9 @@ def overlap_add(h, x, M):
     N = L+M-1
     NF = (int)(np.ceil(len(x) / M))
 
-    # xp = np.zeros(NF*M)
-    # xp[:len(x)]=x[:] # This will make things easier later
+    # Zero-pad x
+    if len(x) < NF*M:
+        xp = np.concatenate((x,np.zeros(NF*M-len(x)))) # This will make things easier later
 
     # First, zero-pad h to a length of N samples, where N=L+M-1.
     hp = np.zeros(N)
@@ -168,12 +169,7 @@ def overlap_add(h, x, M):
     H = np.fft.fft(hp)
 
     # Third, chop x into frames of length M.
-    frames = []
-    for i in range(NF):
-        if len(x[i*M:]) >= M:
-            frames.append(x[i*M:i*M+M])
-        else:
-            frames.append(x[i*M:])
+    frames = np.split(xp,NF)
 
     # Fourth, prepare the output array, y, of length equal to NF*M + L - 1.
     y = np.zeros(NF*M + L - 1)
