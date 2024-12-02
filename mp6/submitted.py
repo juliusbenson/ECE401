@@ -101,6 +101,16 @@ def todo_filter(x, a, b):
       Assume that x[n]==0 for n<0.
       Do not generate samples of y[n] for n >= N.
     '''
+    N = len(x)
+    y = np.zeros(N)
+    for n in range(N):
+        if n > 2:
+            y[n] = x[n] + b[1]*x[n-1] + b[2]*x[n-2] - a[1]*y[n-1] - a[2]*y[n-2]
+        elif n > 1:
+            y[n] = x[n] + b[1]*x[n-1]               - a[1]*y[n-1]
+        else:
+            y[n] = x[n]
+    return y
     raise RuntimeError('You need to write this!')
 
 def todo_bell_pole(sample_rate, frequency, decay_time):
