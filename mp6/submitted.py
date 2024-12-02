@@ -79,6 +79,15 @@ def todo_freqresponse(a, b, N, version='right'):
     omega (N) - frequencies linearly spaced between 0 and 2pi, not including 2pi.
     H (N) - B(e^{jw})/A(e^{jw}) evaluated at the frequencies in the vector omega.
     '''
+    print(a)
+    print(b)
+    omega = np.linspace(0,2*np.pi,N,endpoint=False)
+    H = np.ones(N,dtype='complex')
+    for n,w in enumerate(omega):
+        A = np.sum([a_ik*np.exp(1j*w*-i) for i,a_ik in enumerate(a)])
+        B = np.sum([b_ik*np.exp(1j*w*-i) for i,b_ik in enumerate(b)])
+        H[n] = np.divide(B,A)
+    return omega, H
     raise RuntimeError('You need to write this!')
     
 def todo_filter(x, a, b):
