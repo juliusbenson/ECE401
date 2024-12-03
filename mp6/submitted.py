@@ -60,6 +60,7 @@ def todo_coefficients(r):
     Output:
     b (3,nfreqs) - an array of second-order polynomial coefficients, one per complex root pair
     '''
+    print(r)
     (roots,conjs) = r
     nfreqs = len(roots)
     b = np.zeros((nfreqs,3))
@@ -125,6 +126,10 @@ def todo_bell_pole(sample_rate, frequency, decay_time):
     @return:
     p (complex 2-array) - poles in the Z plane
     '''
+    BW = 1/(np.pi*decay_time)
+    r = todo_zeros(frequency,sample_rate)
+    p = todo_poles(r,BW,sample_rate)
+    return p
     raise RuntimeError('You need to write this!')
 
 def todo_bell_simple(sample_rate, frequency, decay_time, duration):
@@ -143,6 +148,17 @@ def todo_bell_simple(sample_rate, frequency, decay_time, duration):
     Output:
     x (array of length sample_rate*duration) - impulse response of the resonator
     '''
+    (root,conj) = todo_bell_pole(sample_rate,frequency,decay_time)
+    a = todo_coefficients(([root],[conj]))
+    print(a)
+    a = np.concat(a)
+    print(a)
+    b = [1, 0, 0]
+    samples = int(duration*sample_rate)
+    d = np.zeros(samples)
+    d[0] = 1 # kronecker delta = discrete impulse
+    x = todo_filter(d, a, b)
+    return x
     raise RuntimeError('You need to write this!')
 
 def todo_bell_multitone(sample_rate, frequencies, decay_times, duration):
