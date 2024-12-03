@@ -36,7 +36,7 @@ def todo_zeros(freqs, fs):
     Output:
     r (2,nfreqs) - an array of complex zeros on the unit circle, in complex conjugate pairs
     '''
-    r_0k = np.exp(2j*np.pi*freqs/fs)
+    r_0k = np.exp(np.multiply(freqs,2j*np.pi/fs))
     return r_0k,np.conjugate(r_0k)
     raise RuntimeError('You need to write this!')
 
@@ -60,7 +60,6 @@ def todo_coefficients(r):
     Output:
     b (3,nfreqs) - an array of second-order polynomial coefficients, one per complex root pair
     '''
-    print(r)
     (roots,conjs) = r
     nfreqs = len(roots)
     b = np.zeros((nfreqs,3))
@@ -80,8 +79,6 @@ def todo_freqresponse(a, b, N, version='right'):
     omega (N) - frequencies linearly spaced between 0 and 2pi, not including 2pi.
     H (N) - B(e^{jw})/A(e^{jw}) evaluated at the frequencies in the vector omega.
     '''
-    print(a)
-    print(b)
     omega = np.linspace(0,2*np.pi,N,endpoint=False)
     H = np.ones(N,dtype='complex')
     for n,w in enumerate(omega):
@@ -126,7 +123,7 @@ def todo_bell_pole(sample_rate, frequency, decay_time):
     @return:
     p (complex 2-array) - poles in the Z plane
     '''
-    BW = 1/(np.pi*decay_time)
+    BW = 1/np.multiply(np.pi,decay_time)
     r = todo_zeros(frequency,sample_rate)
     p = todo_poles(r,BW,sample_rate)
     return p
@@ -150,13 +147,13 @@ def todo_bell_simple(sample_rate, frequency, decay_time, duration):
     '''
     (root,conj) = todo_bell_pole(sample_rate,frequency,decay_time)
     a = todo_coefficients(([root],[conj]))
-    print(a)
     a = np.concat(a)
-    print(a)
     b = [1, 0, 0]
     samples = int(duration*sample_rate)
     d = np.zeros(samples)
-    d[0] = 1 # kronecker delta = discrete impulse
+    for i in range(samples):
+        d[i] = np.cos(660/sample_rate)
+    # d[0] = 1 # kronecker delta = discrete impulse
     x = todo_filter(d, a, b)
     return x
     raise RuntimeError('You need to write this!')
@@ -175,4 +172,18 @@ def todo_bell_multitone(sample_rate, frequencies, decay_times, duration):
     x (array of length sample_rate*duration) - impulse response of the bell.
       This is just the sum of the todo_bell_simple impulse responses.
     '''
+    p = todo_bell_pole(sample_rate,frequencies,decay_times)
+    a = todo_coefficients(p)
+    b = [1,0,0]
+    samples = int(duration*sample_rate)
+    d = np.zeros(samples)
+
+    for i in range(samples):
+        d[i] = np.cos(660/sample_rate)
+
+    x = d
+    for k in range(len(frequencies)):
+        y = todo_filter(x, a[:,k], b)
+        x = y
+    return y
     raise RuntimeError('You need to write this!')
